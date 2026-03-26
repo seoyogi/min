@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>2Dマイクラ</title>
+
+<style>
+body {
+  margin: 0;
+  overflow: hidden;
+}
+
+/* 空 */
+#sky {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: url("soraimg.jpg") no-repeat center/cover;
+  z-index: 0;
+}
+
+/* 地面 */
+#ground {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 200px;
+  background: url("depositphotos_842994370-stock-illustration-minecraft-pixel-landscape-sky-grass~2.jpg") repeat-x;
+  z-index: 1;
+}
+
+/* プレイヤー */
+#player {
+  position: absolute;
+  left: 100px;
+  top: 300px;
+  width: 120px;
+  z-index: 2;
+}
+
+/* 仮想スティック */
+#stickArea {
+  position: fixed;
+  bottom: 40px;
+  left: 40px;
+  width: 150px;
+  height: 150px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 50%;
+  z-index: 3;
+}
+
+#stick {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 50%;
+  left: 45px;
+  top: 45px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="sky"></div>
+<div id="ground"></div>
+
+<img id="player" src="プロジェクト_03-22(1)_Full HD 1080p_MEDIUM_FR602.png">
+
+<div id="stickArea">
+  <div id="stick"></div>
+</div>
+
+<script>
+const player = document.getElementById("player");
+const stick = document.getElementById("stick");
+const area = document.getElementById("stickArea");
+
+let x = 100;
+let y = 300;
+let speed = 3;
+
+let dx = 0;
+let dy = 0;
+
+// 仮想スティック操作
+area.addEventListener("touchstart", handleTouch);
+area.addEventListener("touchmove", handleTouch);
+area.addEventListener("touchend", resetStick);
+
+function handleTouch(e) {
+  const rect = area.getBoundingClientRect();
+  const touch = e.touches[0];
+
+  let offsetX = touch.clientX - rect.left - 75;
+  let offsetY = touch.clientY - rect.top - 75;
+
+  const distance = Math.sqrt(offsetX*offsetX + offsetY*offsetY);
+  const max = 50;
+
+  if (distance > max) {
+    offsetX *= max / distance;
+    offsetY *= max / distance;
+  }
+
+  stick.style.left = (offsetX + 75 - 30) + "px";
+  stick.style.top = (offsetY + 75 - 30) + "px";
+
+  dx = offsetX / max;
+  dy = offsetY / max;
+}
+
+function resetStick() {
+  stick.style.left = "45px";
+  stick.style.top = "45px";
+  dx = 0;
+  dy = 0;
+}
+
+// ループ
+function gameLoop() {
+  let moving = false;
+
+  if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
+    x += dx * speed * 5;
+    y += dy * speed * 5;
+    moving = true;
+  }
+
+  // 地面制限（落ちない）
+  if (y > window.innerHeight - 320) {
+    y = window.innerHeight - 320;
+  }
+
+  player.style.left = x + "px";
+  player.style.top = y + "px";
+
+  // 画像切り替え
+  if (moving) {
+    player.src = "output-onlinegiftools.gif";
+  } else {
+    player.src = "プロジェクト_03-22(1)_Full HD 1080p_MEDIUM_FR602.png";
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
+
+</body>
+</html>
